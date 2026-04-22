@@ -12,7 +12,8 @@ sent_headlines = set()
 GOLD_KEYWORDS = [
     'trump','tariff','tariffs','federal reserve','fed rate',
     'powell','rate cut','rate hike','inflation','gold price',
-    'xauusd','war','sanctions','geopolit','dollar index',
+    'xauusd'war crimes','declared war','military strike','sanctions imposed',
+,'geopolit','dollar index',
     'recession','bank fail','debt ceiling','china trade',
     'iran','ukraine','russia','safe haven','bullion'
 ]
