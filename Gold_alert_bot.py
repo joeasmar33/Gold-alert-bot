@@ -1,4 +1,3 @@
-
 import time
 import requests
 import datetime
@@ -102,17 +101,21 @@ def estimate_direction(text):
             return 'UP'
     return 'WATCH'
 
+def get_lebanon_time():
+    lebanon_time = datetime.datetime.utcnow() + datetime.timedelta(hours=3)
+    return lebanon_time.strftime('%H:%M — %d %b %Y 🇱🇧')
+
 def run():
     print('Gold Alert Bot started')
     send_telegram(
-        '<b>GOLD SIGNAL BOT ACTIVATED</b>\n\n'
+        '<b>🟢 GOLD SIGNAL BOT ACTIVATED</b>\n\n'
         'Scanning Reuters, CNBC, MarketWatch every 2 min for:\n'
         '- Trump tariffs and statements\n'
         '- Fed rate decisions\n'
         '- Military strikes and wars\n'
         '- Inflation and CPI data\n'
         '- Bank failures and crises\n\n'
-        'Only HIGH impact gold news will alert you!'
+        '🇱🇧 Time: ' + get_lebanon_time()
     )
     while True:
         print('Scanning...')
@@ -130,13 +133,12 @@ def run():
                 impact = estimate_impact(keyword)
                 direction = estimate_direction(full_text)
                 dir_emoji = '📈 GOLD UP' if direction == 'UP' else '📉 GOLD DOWN' if direction == 'DOWN' else '👀 WATCH'
-                now = datetime.datetime.utcnow().strftime('%H:%M UTC')
                 msg = (
                     '<b>⚡ GOLD ALERT - ' + impact + '</b>\n\n'
-                    + '📰 ' + title + '\n\n'
+                    '📰 ' + title + '\n\n'
                     + dir_emoji + '\n'
-                    + '🔑 Trigger: ' + keyword.upper() + '\n'
-                    + '⏰ ' + now
+                    '🔑 Trigger: ' + keyword.upper() + '\n'
+                    '⏰ ' + get_lebanon_time()
                 )
                 send_telegram(msg)
                 sent_headlines.add(title)
