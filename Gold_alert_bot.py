@@ -1,3 +1,4 @@
+
 import time
 import requests
 import datetime
@@ -10,12 +11,22 @@ SCAN_INTERVAL = 120
 sent_headlines = set()
 
 GOLD_KEYWORDS = [
-    'trump','tariff','tariffs','federal reserve','fed rate',
-    'powell','rate cut','rate hike','inflation','gold price',
-    'xauusd'war crimes','declared war','military strike','sanctions imposed',
-,'geopolit','dollar index',
-    'recession','bank fail','debt ceiling','china trade',
-    'iran','ukraine','russia','safe haven','bullion'
+    'trump tariff', 'trump tax', 'trump sanction', 'trump fed',
+    'trump dollar', 'trump trade', 'trump china', 'trump iran',
+    'federal reserve rate', 'fed rate cut', 'fed rate hike',
+    'powell rate', 'interest rate decision', 'rate decision',
+    'gold price', 'gold surges', 'gold falls', 'gold jumps',
+    'xauusd', 'gold futures', 'spot gold',
+    'military strike', 'missile attack', 'war declared',
+    'troops deployed', 'nuclear threat', 'ceasefire',
+    'iran sanction', 'russia sanction', 'china sanction',
+    'oil embargo', 'trade war', 'trade deal',
+    'inflation rate', 'cpi data', 'cpi report',
+    'bank collapse', 'bank failure', 'bank run',
+    'debt ceiling', 'us default', 'dollar collapse',
+    'dollar index falls', 'dollar weakens',
+    'safe haven demand', 'flight to safety',
+    'geopolitical tension', 'geopolitical crisis',
 ]
 
 RSS_FEEDS = [
@@ -58,32 +69,53 @@ def is_gold_relevant(text):
             return kw
     return None
 
-def estimate_impact(text):
-    text_lower = text.lower()
-    high = ['trump','tariff','war','sanctions','fed rate','rate cut','rate hike','bank fail','debt ceiling']
+def estimate_impact(keyword):
+    high = [
+        'trump tariff', 'trump sanction', 'federal reserve rate',
+        'fed rate cut', 'fed rate hike', 'powell rate',
+        'military strike', 'missile attack', 'war declared',
+        'nuclear threat', 'bank collapse', 'bank failure',
+        'debt ceiling', 'us default', 'gold surges', 'gold jumps',
+        'iran sanction', 'trade war', 'dollar collapse'
+    ]
     for h in high:
-        if h in text_lower:
+        if h in keyword:
             return 'HIGH'
     return 'MEDIUM'
 
 def estimate_direction(text):
     text_lower = text.lower()
-    up_words = ['tariff','war','sanction','inflation','weak dollar','rate cut','crisis','fail','conflict','safe haven']
-    down_words = ['rate hike','strong dollar','ceasefire','peace','recovery','beat expectations']
-    for w in up_words:
-        if w in text_lower:
-            return 'UP'
+    up_words = [
+        'tariff', 'strike', 'sanction', 'inflation', 'rate cut',
+        'crisis', 'collapse', 'fail', 'conflict', 'safe haven',
+        'tension', 'nuclear', 'weakens', 'falls', 'embargo'
+    ]
+    down_words = [
+        'rate hike', 'strong dollar', 'ceasefire', 'peace deal',
+        'recovery', 'beat expectations', 'trade deal signed'
+    ]
     for w in down_words:
         if w in text_lower:
             return 'DOWN'
-    return 'UNCERTAIN'
+    for w in up_words:
+        if w in text_lower:
+            return 'UP'
+    return 'WATCH'
 
 def run():
-    print('Gold Alert Bot started - using RSS feeds')
-    send_telegram('<b>GOLD SIGNAL BOT ACTIVATED</b>\n\nNow scanning Reuters, CNBC, MarketWatch every 2 minutes for:\n- Trump statements\n- Fed decisions\n- Tariffs and wars\n- Inflation data\n- Geopolitical events\n\nAlerts incoming instantly!')
-
+    print('Gold Alert Bot started')
+    send_telegram(
+        '<b>GOLD SIGNAL BOT ACTIVATED</b>\n\n'
+        'Scanning Reuters, CNBC, MarketWatch every 2 min for:\n'
+        '- Trump tariffs and statements\n'
+        '- Fed rate decisions\n'
+        '- Military strikes and wars\n'
+        '- Inflation and CPI data\n'
+        '- Bank failures and crises\n\n'
+        'Only HIGH impact gold news will alert you!'
+    )
     while True:
-        print('Scanning RSS feeds...')
+        print('Scanning...')
         for feed_url in RSS_FEEDS:
             items = fetch_rss(feed_url)
             for item in items:
@@ -95,20 +127,20 @@ def run():
                     continue
                 if title in sent_headlines:
                     continue
-                impact = estimate_impact(full_text)
+                impact = estimate_impact(keyword)
                 direction = estimate_direction(full_text)
-                dir_emoji = 'GOLD UP' if direction == 'UP' else 'GOLD DOWN' if direction == 'DOWN' else 'WATCH'
+                dir_emoji = '📈 GOLD UP' if direction == 'UP' else '📉 GOLD DOWN' if direction == 'DOWN' else '👀 WATCH'
                 now = datetime.datetime.utcnow().strftime('%H:%M UTC')
                 msg = (
-                    '<b>GOLD ALERT - ' + impact + '</b>\n\n'
-                    + title + '\n\n'
-                    + 'Signal: ' + dir_emoji + '\n'
-                    + 'Trigger: ' + keyword.upper() + '\n'
-                    + 'Time: ' + now
+                    '<b>⚡ GOLD ALERT - ' + impact + '</b>\n\n'
+                    + '📰 ' + title + '\n\n'
+                    + dir_emoji + '\n'
+                    + '🔑 Trigger: ' + keyword.upper() + '\n'
+                    + '⏰ ' + now
                 )
                 send_telegram(msg)
                 sent_headlines.add(title)
-                print('Alert sent: ' + title[:60])
+                print('Sent: ' + title[:60])
                 if len(sent_headlines) > 500:
                     sent_headlines.clear()
         time.sleep(SCAN_INTERVAL)
